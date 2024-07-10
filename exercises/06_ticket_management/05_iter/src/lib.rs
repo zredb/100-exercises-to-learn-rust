@@ -1,3 +1,4 @@
+use std::vec::IntoIter;
 use ticket_fields::{TicketDescription, TicketTitle};
 
 // TODO: Provide an `iter` method that returns an iterator over `&Ticket` items.
@@ -6,7 +7,7 @@ pub struct TicketStore {
     tickets: Vec<Ticket>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug,  Clone, PartialEq)]
 pub struct Ticket {
     title: TicketTitle,
     description: TicketDescription,
@@ -30,9 +31,25 @@ impl TicketStore {
     pub fn add_ticket(&mut self, ticket: Ticket) {
         self.tickets.push(ticket);
     }
+
+    // pub fn iter(& self)->IntoIter<Ticket>{
+    //     self.tickets.clone().into_iter()
+    // }
+    pub fn iter(&self) -> std::slice::Iter<Ticket> {
+        self.tickets.iter()
+    }
 }
 
-#[cfg(test)]
+impl Iterator for TicketStore {
+    type Item = Ticket;
+    fn next(&mut self) -> Option<Self::Item> {
+        
+       // self.tickets.iter().next().cloned()
+        self.tickets.iter().next().map(|ticket| ticket.clone())
+    }
+}
+
+    #[cfg(test)]
 mod tests {
     use super::*;
     use ticket_fields::test_helpers::{ticket_description, ticket_title};

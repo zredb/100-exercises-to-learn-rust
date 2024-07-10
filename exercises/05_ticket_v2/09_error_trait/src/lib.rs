@@ -3,9 +3,28 @@
 //  The docs for the `std::fmt` module are a good place to start and look for examples:
 //  https://doc.rust-lang.org/std/fmt/index.html#write
 
+use std::error::Error;
+use std::fmt;
+use std::fmt::{Display, Formatter};
+
+#[derive(Debug)]
 enum TicketNewError {
     TitleError(String),
     DescriptionError(String),
+}
+impl Display for TicketNewError{
+    fn fmt(&self, f: &mut Formatter) ->  fmt::Result {
+        match self {
+            TicketNewError::TitleError(te) => write!(f, "{te}"),
+            TicketNewError::DescriptionError(de) => write!(f, "{de}"),
+        }
+    }
+
+}
+impl Error for TicketNewError {
+    fn description(&self) -> &str {
+        &self.description()
+    }
 }
 
 // TODO: `easy_ticket` should panic when the title is invalid, using the error message
@@ -13,7 +32,11 @@ enum TicketNewError {
 //   When the description is invalid, instead, it should use a default description:
 //   "Description not provided".
 fn easy_ticket(title: String, description: String, status: Status) -> Ticket {
-    todo!()
+    let res=Ticket::new(title, description, status);
+    match res {
+        Ok(ticket) => {ticket}
+        Err(error) => {panic!("{}",error)}
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -46,15 +69,12 @@ impl Ticket {
                 "Title cannot be longer than 50 bytes".to_string(),
             ));
         }
+        let mut description=description;
         if description.is_empty() {
-            return Err(TicketNewError::DescriptionError(
-                "Description cannot be empty".to_string(),
-            ));
+            description="Description not provided".into();
         }
         if description.len() > 500 {
-            return Err(TicketNewError::DescriptionError(
-                "Description cannot be longer than 500 bytes".to_string(),
-            ));
+            description="Description not provided".into();
         }
 
         Ok(Ticket {

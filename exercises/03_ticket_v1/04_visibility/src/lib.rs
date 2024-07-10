@@ -1,12 +1,12 @@
-mod ticket {
-    struct Ticket {
-        title: String,
-        description: String,
-        status: String,
+ mod ticket {
+     pub struct Ticket {
+       pub title: String,
+       pub description: String,
+       pub status: String,
     }
 
     impl Ticket {
-        fn new(title: String, description: String, status: String) -> Ticket {
+       pub fn new(title: String, description: String, status: String) -> Ticket {
             if title.is_empty() {
                 panic!("Title cannot be empty");
             }
@@ -48,7 +48,7 @@ mod tests {
 
         // You should be seeing this error when trying to run this exercise:
         //
-        // error[E0616]: field `description` of struct `Ticket` is private
+        // error[E0616]: field `description` of struct `encapsulation::ticket::Ticket` is private
         //    |
         //    |              assert_eq!(ticket.description, "A description");
         //    |                         ^^^^^^^^^^^^^^^^^^

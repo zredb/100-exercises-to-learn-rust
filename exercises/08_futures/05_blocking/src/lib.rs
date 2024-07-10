@@ -4,17 +4,25 @@
 //  Use `spawn_blocking` inside `echo` to resolve the issue.
 use std::io::{Read, Write};
 use tokio::net::TcpListener;
+use tokio::task;
+use anyhow::Error; // 确保导入Error类型
 
 pub async fn echo(listener: TcpListener) -> Result<(), anyhow::Error> {
     loop {
         let (socket, _) = listener.accept().await?;
-        let mut socket = socket.into_std()?;
-        socket.set_nonblocking(false)?;
-        let mut buffer = Vec::new();
-        socket.read_to_end(&mut buffer)?;
-        socket.write_all(&buffer)?;
+        task::spawn_blocking(move || {
+            let mut socket = socket.into_std()?;
+            socket.set_nonblocking(false)?;
+            let mut buffer = Vec::new();
+            socket.read_to_end(&mut buffer)?;
+            socket.write_all(&buffer)?;
+            Ok::<(), anyhow::Error>(()) // 明确返回类型为Ok(())
+        })
+            .await?
+            .map_err(Into::<Error>::into)?; // 明确指定转换的目标类型
     }
 }
+
 
 #[cfg(test)]
 mod tests {

@@ -15,7 +15,23 @@ pub fn fibonacci(n: u32) -> u32 {
     //
     // Hint: use a `Vec` to memoize the results you have already calculated
     // so that you don't have to recalculate them several times.
-    todo!()
+
+    match n {
+        0 => 0,
+        1 => 1,
+        n => {
+            let mut fib = Vec::new();
+            fib.push(0);
+            fib.push(1);
+            for i in 2..=n {
+                let x = fib.get((i - 2) as usize).unwrap() + fib.get((i - 1) as usize).unwrap();
+
+                fib.push(x);
+                println!("{} --> {} ==>{:?}", i, x, fib);
+            }
+            *fib.last().unwrap()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -43,7 +59,7 @@ mod tests {
     }
 
     #[test]
-    fn thirtieth() {
+    fn thirthieth() {
         assert_eq!(fibonacci(30), 832040);
     }
 }

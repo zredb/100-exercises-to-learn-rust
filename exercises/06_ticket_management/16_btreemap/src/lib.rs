@@ -3,7 +3,8 @@
 //  references to the tickets, ordered by their `TicketId`.
 //  Implement additional traits on `TicketId` if needed.
 
-use std::collections::BTreeMap;
+use std::collections::{btree_map, BTreeMap};
+use std::iter::Map;
 use std::ops::{Index, IndexMut};
 use ticket_fields::{TicketDescription, TicketTitle};
 
@@ -13,7 +14,7 @@ pub struct TicketStore {
     counter: u64,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Ord, Eq, PartialOrd)]
 pub struct TicketId(u64);
 
 #[derive(Clone, Debug, PartialEq)]
@@ -40,7 +41,7 @@ pub enum Status {
 impl TicketStore {
     pub fn new() -> Self {
         Self {
-            tickets: todo!(),
+            tickets: BTreeMap::new(),
             counter: 0,
         }
     }
@@ -54,16 +55,22 @@ impl TicketStore {
             description: ticket.description,
             status: Status::ToDo,
         };
-        todo!();
+        self.tickets.insert(id, ticket);
         id
     }
 
     pub fn get(&self, id: TicketId) -> Option<&Ticket> {
-        todo!()
+       self.tickets.get(&id)
     }
 
     pub fn get_mut(&mut self, id: TicketId) -> Option<&mut Ticket> {
-        todo!()
+        self.tickets.get_mut(&id)
+    }
+
+    // 新增迭代器实现
+    // 实现迭代器，返回Ticket的引用迭代器
+    pub fn iter(&self) -> btree_map::Values<'_, TicketId, Ticket> {
+        self.tickets.values()
     }
 }
 
@@ -92,6 +99,21 @@ impl IndexMut<TicketId> for TicketStore {
 impl IndexMut<&TicketId> for TicketStore {
     fn index_mut(&mut self, index: &TicketId) -> &mut Self::Output {
         &mut self[*index]
+    }
+}
+
+// 这里我们不需要显式定义IntoIter类型，因为我们已经在TicketStore的iter方法中返回了一个Iterator
+// 然而，如果我们想要一个具体的类型，我们可以这样做：
+// 在&TicketStore上实现IntoIterator
+impl<'a> IntoIterator for &'a TicketStore {
+    type Item = &'a Ticket;
+    type IntoIter = Map<
+        btree_map::Iter<'a, TicketId, Ticket>,
+        fn((&'a TicketId, &'a Ticket)) -> &'a Ticket
+    >;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.tickets.iter().map(|(&id, ticket)| ticket)
     }
 }
 

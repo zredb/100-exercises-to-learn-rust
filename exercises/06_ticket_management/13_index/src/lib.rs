@@ -1,5 +1,6 @@
 // TODO: Implement `Index<&TicketId>` and `Index<TicketId>` for `TicketStore`.
 
+use std::ops::Index;
 use ticket_fields::{TicketDescription, TicketTitle};
 
 #[derive(Clone)]
@@ -55,6 +56,27 @@ impl TicketStore {
 
     pub fn get(&self, id: TicketId) -> Option<&Ticket> {
         self.tickets.iter().find(|&t| t.id == id)
+    }
+
+    // 实现Index<&TicketId>和Index<TicketId>以返回Ticket的引用
+    fn index_impl(&self, id: &TicketId) -> Option<&Ticket> {
+        self.tickets.iter().find(|t| &t.id == id)
+    }
+}
+
+impl Index<&TicketId> for TicketStore {
+    type Output = Ticket;
+
+    fn index(&self, id: &TicketId) -> &Self::Output {
+        self.index_impl(id).expect("No ticket found for this ID")
+    }
+}
+
+impl Index<TicketId> for TicketStore{
+    type Output = Ticket;
+
+    fn index(&self, id: TicketId) -> &Self::Output {
+        self.index_impl(&id).expect("No ticket found for this ID")
     }
 }
 

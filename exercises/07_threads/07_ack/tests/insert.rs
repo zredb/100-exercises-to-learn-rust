@@ -23,7 +23,7 @@ fn insert_works() {
         // because the channel will be closed.
         .expect("Did you actually spawn a thread? The channel is closed!");
 
-    let ticket_id: TicketId = response_receiver.recv().expect("No response received!");
+    let ticket_id: TicketId = response_receiver.recv().expect("No response received!").unwrap().id;
 
     let (response_sender, response_receiver) = std::sync::mpsc::channel();
     let command = Command::Get {

@@ -76,7 +76,14 @@ pub fn server(receiver: Receiver<Command>) {
                 response_channel,
             }) => {
                 let ticket = store.get(id);
-                let _ = response_channel.send(ticket);
+                match ticket {
+                    Some(ticket) => {
+                        let _ = response_channel.try_send(Some(ticket.clone()));
+                    }
+                    None => {
+                        let _ = response_channel.try_send(None);
+                    }
+                }
             }
             Err(_) => {
                 // There are no more senders, so we can safely break

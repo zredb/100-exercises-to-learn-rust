@@ -6,6 +6,9 @@
 // You also need to add a `get` method that takes as input a `TicketId`
 // and returns an `Option<&Ticket>`.
 
+use std::cmp::Ordering;
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering::Relaxed;
 use ticket_fields::{TicketDescription, TicketTitle};
 
 #[derive(Clone)]
@@ -44,11 +47,27 @@ impl TicketStore {
         }
     }
 
-    pub fn add_ticket(&mut self, ticket: Ticket) {
+    pub fn add_ticket(&mut self, ticket: TicketDraft)->TicketId {
+        let tid=Self::genId();
+        let ticket=Ticket{
+            id:tid,
+            description:ticket.description,
+            title:ticket.title,
+            status:Status::ToDo
+        };
         self.tickets.push(ticket);
+        tid.clone()
+    }
+    fn genId()->TicketId{
+        id.fetch_add(1, Relaxed);
+        let regular_value: u64 = id.load(Relaxed);
+        TicketId(regular_value)
+    }
+    fn get(&self, tid: TicketId)-> Option<&Ticket> {
+        self.tickets.iter().find(|t| t.id == tid)
     }
 }
-
+static id:AtomicU64=AtomicU64::new(0);
 #[cfg(test)]
 mod tests {
     use crate::{Status, TicketDraft, TicketStore};

@@ -3,8 +3,18 @@
 //  Do not allocate any additional memory!
 use std::thread;
 
-pub fn sum(slice: &'static [i32]) -> i32 {
-    todo!()
+pub fn sum(slice: &'static [i32]) -> i32{
+    let mid = slice.len() / 2;
+
+    let left_vec = &slice[..mid];
+    let right_vec = &slice[mid..];
+
+    // Spawn two threads to calculate the sum of each half
+    let left_thread = thread::spawn(move || left_vec.iter().sum::<i32>());
+    let right_thread = thread::spawn(move || right_vec.iter().sum::<i32>());
+
+    // Join both threads and add up their results
+    left_thread.join().unwrap() + right_thread.join().unwrap()
 }
 
 #[cfg(test)]

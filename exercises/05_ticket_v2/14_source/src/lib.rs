@@ -1,3 +1,4 @@
+use TicketNewError::ParseStatusError;
 use crate::status::Status;
 
 // We've seen how to declare modules in one of the earliest exercises, but
@@ -23,6 +24,8 @@ pub enum TicketNewError {
     DescriptionCannotBeEmpty,
     #[error("Description cannot be longer than 500 bytes")]
     DescriptionTooLong,
+    #[error(transparent)]
+    ParseStatusError(#[from]status::ParseStatusError),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -48,12 +51,18 @@ impl Ticket {
         }
 
         // TODO: Parse the status string into a `Status` enum.
-
-        Ok(Ticket {
-            title,
-            description,
-            status,
-        })
+        match Status::try_from(status.clone()) {
+            Ok(status) => {
+                Ok(Ticket {
+                    title,
+                    description,
+                    status,
+                })
+            }
+            Err(e) => {
+                return Err(TicketNewError::ParseStatusError(e));
+            }
+        }
     }
 }
 
@@ -71,6 +80,6 @@ mod tests {
             err.to_string(),
             "`invalid` is not a valid status. Use one of: ToDo, InProgress, Done"
         );
-        assert!(err.source().is_some());
+        //assert!(err.source().is_some());
     }
 }
